@@ -17,3 +17,5 @@ Values listed in Ohms
 # LEDs
 
 Positive side is longer than negative
+
+![image](https://github.com/user-attachments/assets/e3691e01-21ab-44c7-a6b3-ea9c85b60ea6)
