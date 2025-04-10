@@ -3,13 +3,16 @@
 ## Personal Shorthand
 - ASW: Arduino software
 
-## serial connection
+## Arduino miscellany
+- sketch: an Arduino program
+
+## Serial connection
 
 [Reference](https://learn.sparkfun.com/tutorials/serial-communication)
  - rx: receiver
  - tx: transmitter
 
-## serial terminal
+## Serial terminal
 
 [Reference](https://learn.sparkfun.com/tutorials/terminal-basics/all)
 
@@ -30,3 +33,14 @@ If nothing is connected, clicking that icon or using the keyboard shortcut yield
 ## Making a connection
 
 Plugging the Arduino into a USB port makes it to where, after a few seconds, another port option that ends in (Arduino Uno) will pop up in the Tools -> Port dropdown menu in the Arduino Software (ASW).
+
+Upoading a program to the Arduino makes the L LED flicker.
+
+Every Arduino sketch must have a `setup` function and a separate `loop` function. the `setup` function runs **once**, when the Arduino initially receives power, after a reset, or after a sketch is uploaded. Conversely, the `loop` function loops. 👍
+
+### LED Function
+
+`HIGH` setting means high voltage/on/1.
+
+`LOW` setting means low volates/off/0.
+
