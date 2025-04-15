@@ -44,3 +44,11 @@ Every Arduino sketch must have a `setup` function and a separate `loop` function
 
 `LOW` setting means low volates/off/0.
 
+When connecting an LED, it's important to remember:
+ - The positive lead (anode) will be longer
+ - Voltage must go into the anode
+ - Cathod must be grounded
+ - The LED will not light if connected backwards
+ - A resistor **must** be used in series with the LED, otherwise it will burn out
+ - The resistor may be placed before or after the LED
+
