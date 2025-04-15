@@ -28,6 +28,8 @@ If nothing is connected, clicking that icon or using the keyboard shortcut yield
 `Board at null is not available`
 ![image](https://github.com/user-attachments/assets/3b640847-ec86-4dc2-af22-8a5fd5133cab)
 
+In the simulator, the Serial Monitor can be added and accessed with [these instructions](https://docs.wokwi.com/guides/serial-monitor#configuring-the-serial-monitor).
+
 # Methodology
 
 ## Making a connection
