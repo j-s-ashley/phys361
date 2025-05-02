@@ -1,5 +1,3 @@
-#include <SevSeg.h>
-
 /* SevSeg Counter Example
 
  Copyright 2017 Dean Reading
@@ -19,6 +17,7 @@
  This example demonstrates a very simple use of the SevSeg library with a 4
  digit display. It displays a counter that counts up, showing deci-seconds.
  */
+#include <SevSeg.h>
 
 SevSeg sevseg; //Instantiate a seven segment controller object
 
