@@ -1,57 +1,61 @@
-#include <SevSeg.h>
+/*
+doppler.ino
+Takes analog input from microphone
+Displays via LCD on Arduino
 
-/* SevSeg Counter Example
+Last edit:
+2025/05/06
+by
+Jordan Ashley (@jashley)
+*/
 
- Copyright 2017 Dean Reading
+// include the library code:
+#include <LiquidCrystal.h>
 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
- http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
-
-
- This example demonstrates a very simple use of the SevSeg library with a 4
- digit display. It displays a counter that counts up, showing deci-seconds.
- */
-
-SevSeg sevseg; //Instantiate a seven segment controller object
+// initialize the library by associating any needed LCD interface pin
+// with the arduino pin number it is connected to
+const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 void setup() {
-  byte numDigits = 4;
-  byte digitPins[] = {2, 3, 4, 5};
-  byte segmentPins[] = {6, 7, 8, 9, 10, 11, 12, 13};
-  bool resistorsOnSegments = false; // 'false' means resistors are on digit pins
-  byte hardwareConfig = COMMON_ANODE; // See README.md for options
-  bool updateWithDelays = false; // Default 'false' is Recommended
-  bool leadingZeros = false; // Use 'true' if you'd like to keep the leading zeros
-  bool disableDecPoint = false; // Use 'true' if your decimal point doesn't exist or isn't connected
-
-  sevseg.begin(hardwareConfig, numDigits, digitPins, segmentPins, resistorsOnSegments,
-  updateWithDelays, leadingZeros, disableDecPoint);
-  sevseg.setBrightness(90);
+  // set up the LCD's number of columns and rows:
+  lcd.begin(16, 2);
+  // Print a message to the LCD.
+  lcd.print("hello, world!");
 }
 
-void loop() {
-  static unsigned long timer = millis();
-  static int deciSeconds = 0;
+// --- MICROPHONE --- //
 
-  if (millis() - timer >= 100) {
-    timer += 100;
-    deciSeconds++; // 100 milliSeconds is equal to 1 deciSecond
+const int sampleWindow = 50;  // Sample window width in mS (50 mS = 20Hz)
+int const AMP_PIN = A0;       // Preamp output pin connected to A0
+unsigned int sample;
 
-    if (deciSeconds == 10000) { // Reset to 0 after counting for 1000 seconds.
-      deciSeconds=0;
+void loop()
+{
+  unsigned long startMillis = millis(); // Start of sample window
+  unsigned int peakToPeak = 0;   // peak-to-peak level
+
+  unsigned int signalMax = 0;
+  unsigned int signalMin = 1024;
+
+// collect data for 50 mS and then plot data
+  while (millis() - startMillis < sampleWindow)
+  {
+    sample = analogRead(AMP_PIN);
+    if (sample < 1024)  // toss out spurious readings
+    {
+      if (sample > signalMax)
+      {
+        signalMax = sample;  // save just the max levels
+      }
+      else if (sample < signalMin)
+      {
+        signalMin = sample;  // save just the min levels
+      }
     }
-    sevseg.setNumber(deciSeconds, 1);
   }
-
-  sevseg.refreshDisplay(); // Must run repeatedly
+  peakToPeak = signalMax - signalMin;  // max - min = peak-peak amplitude
+  lcd.println(peakToPeak);
+  //double volts = (peakToPeak * 5.0) / 1024;  // convert to volts
+  //Serial.println(volts);
 }
-
-/// END ///
