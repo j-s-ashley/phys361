@@ -6,56 +6,102 @@ Displays via LCD on Arduino
 Last edit:
 2025/05/06
 by
-Jordan Ashley (@jashley)
+Quintinne Madsen 
 */
 
-// include the library code:
+#include <arduinoFFT.h>
 #include <LiquidCrystal.h>
 
-// initialize the library by associating any needed LCD interface pin
-// with the arduino pin number it is connected to
+// LCD pin setup
 const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
+// FFT setup
+#define MIC_PIN A0
+ArduinoFFT<double> FFT;
+const uint16_t samples = 128;
+double vReal[samples];
+double vImag[samples];
+const double samplingFrequency = 4000.0; // Hz
+
+double lastPeak = 0.0;
+const double alpha = 0.8; // smoothing factor
+double peak = 0.0;
+
+// Timing
+unsigned long lastFFTTime = 0;
+
 void setup() {
-  // set up the LCD's number of columns and rows:
+  Serial.begin(9600);
   lcd.begin(16, 2);
-  // Print a message to the LCD.
-  lcd.print("hello, world!");
+  lcd.print("Starting up...");
 }
 
-// --- MICROPHONE --- //
-
-const int sampleWindow = 50;  // Sample window width in mS (50 mS = 20Hz)
-int const AMP_PIN = A0;       // Preamp output pin connected to A0
-unsigned int sample;
-
-void loop()
-{
-  unsigned long startMillis = millis(); // Start of sample window
-  unsigned int peakToPeak = 0;   // peak-to-peak level
-
-  unsigned int signalMax = 0;
-  unsigned int signalMin = 1024;
-
-// collect data for 50 mS and then plot data
-  while (millis() - startMillis < sampleWindow)
-  {
-    sample = analogRead(AMP_PIN);
-    if (sample < 1024)  // toss out spurious readings
-    {
-      if (sample > signalMax)
-      {
-        signalMax = sample;  // save just the max levels
-      }
-      else if (sample < signalMin)
-      {
-        signalMin = sample;  // save just the min levels
-      }
-    }
+void loop() {
+  if (millis() - lastFFTTime > 500) {
+    runFFT();
+    lastFFTTime = millis();
   }
-  peakToPeak = signalMax - signalMin;  // max - min = peak-peak amplitude
-  lcd.println(peakToPeak);
-  //double volts = (peakToPeak * 5.0) / 1024;  // convert to volts
-  //Serial.println(volts);
+}
+
+void runFFT() {
+  // Sample the microphone
+  unsigned long startMicros = micros();
+  for (uint16_t i = 0; i < samples; i++) {
+    while (micros() - startMicros < (1000000.0 / samplingFrequency) * i);
+    vReal[i] = analogRead(MIC_PIN);
+    vImag[i] = 0.0;
+  }
+
+  // Remove DC offset
+  double mean = 0;
+  for (uint16_t i = 0; i < samples; i++) mean += vReal[i];
+  mean /= samples;
+  for (uint16_t i = 0; i < samples; i++) vReal[i] -= mean;
+
+  // Perform FFT
+  FFT.windowing(vReal, samples, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
+  FFT.compute(vReal, vImag, samples, FFT_FORWARD);
+  FFT.complexToMagnitude(vReal, vImag, samples);
+
+  // Check signal strength
+  double maxAmplitude = 0;
+  for (uint16_t i = 1; i < samples / 2; i++) {
+    if (vReal[i] > maxAmplitude) maxAmplitude = vReal[i];
+  }
+
+  if (maxAmplitude < 50) {
+    displayFrequency(0); // Too quiet
+    return;
+  }
+
+  // Calculate peak frequency
+  double rawPeak = FFT.majorPeak(vReal, samples, samplingFrequency);
+  if (rawPeak < 60 || rawPeak > 2000) rawPeak = 0;
+
+  // Smooth
+  if (abs(rawPeak - lastPeak) < 20) {
+    peak = lastPeak;
+  } else {
+    peak = alpha * lastPeak + (1.0 - alpha) * rawPeak;
+  }
+  lastPeak = peak;
+
+  displayFrequency((int)peak);
+}
+
+void displayFrequency(int freq) {
+  lcd.clear();
+  lcd.setCursor(0, 0);
+
+  if (freq == 0) {
+    lcd.print("Frequency: ----");
+  } else {
+    lcd.print("Frequency: ");
+    lcd.print(freq);
+    lcd.print(" Hz");
+  }
+
+  Serial.print("Freq: ");
+  Serial.println(freq);
 }
