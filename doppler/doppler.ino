@@ -57,7 +57,7 @@ void setup() {
   lcd.print("Starting up...");
 }
 
-void loop() {
+void loop() {								// hold FFT to refresh rate
   if (millis() - lastFFTTime > FFTrefresh) {
     runFFT();
     lastFFTTime = millis();
@@ -66,8 +66,9 @@ void loop() {
 
 void runFFT() {
   // Sample the microphone
-  unsigned long startMicros = micros();
-  for (uint16_t i = 0; i < samples; i++) {
+  unsigned long startMicros = micros();					// timestamp in microseconds
+  for (uint16_t i = 0; i < samples; i++) {				// limit samples taken
+    // Sample every 1000000 / samplingFrequency seconds
     while (micros() - startMicros < (1000000.0 / samplingFrequency) * i);
     vReal[i] = analogRead(MIC_PIN);
     vImag[i] = 0.0;
@@ -80,9 +81,9 @@ void runFFT() {
   for (uint16_t i = 0; i < samples; i++) vReal[i] -= mean;
 
   // Perform FFT
-  FFT.windowing(vReal, samples, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
-  FFT.compute(vReal, vImag, samples, FFT_FORWARD);
-  FFT.complexToMagnitude(vReal, vImag, samples);
+  FFT.windowing(vReal, samples, FFT_WIN_TYP_HAMMING, FFT_FORWARD);	// weigh samples
+  FFT.compute(vReal, vImag, samples, FFT_FORWARD);			// run calculations
+  FFT.complexToMagnitude(vReal, vImag, samples);			// compute magnitude
 
   // Check signal strength
   double maxAmplitude = 0;
@@ -91,11 +92,11 @@ void runFFT() {
   }
 
   if (maxAmplitude < 50) {
-    displayFrequency(0); // Too quiet
+    displayFrequency(0); 						// Too quiet
     return;
   }
 
-  // Calculate peak frequency
+  // Calculate dominant frequency
   double rawPeak = FFT.majorPeak(vReal, samples, samplingFrequency);
   if (rawPeak < 60 || rawPeak > 2000) rawPeak = 0;
 
@@ -107,7 +108,7 @@ void runFFT() {
   }
   lastPeak = peak;
 
-  displayFrequency((int)peak);
+  displayFrequency((int)peak);						// send frequency to LCD
 }
 
 void displayFrequency(int freq) {
