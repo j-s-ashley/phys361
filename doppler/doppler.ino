@@ -9,6 +9,7 @@ Last edit:
 by
 Jordan Ashley @j-s-ashley
 
+TODO: add microphone circuit info
   The circuit:
  * LCD RS pin to digital pin 12
  * LCD Enable pin to digital pin 11
@@ -29,7 +30,7 @@ Jordan Ashley @j-s-ashley
 #include <arduinoFFT.h>
 #include <LiquidCrystal.h>
 
-// Initialize the library by associating any needed LCD interface pin
+// Initialize the library by associating LCD interface pins
 // with the arduino pin number it is connected to
 const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
@@ -37,15 +38,15 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 // FFT setup
 uint16_t FFTrefresh = 50;
 
-#define MIC_PIN A0
-ArduinoFFT<double> FFT;
-const uint16_t samples = 128;
+#define MIC_PIN A0		// set arduino pin A0 as mic input
+ArduinoFFT<double> FFT; 	// initialize FFT class object
+const uint16_t samples = 128;	// set max samples held
 double vReal[samples];
 double vImag[samples];
 const double samplingFrequency = 4000.0; // Hz
 
 double lastPeak = 0.0;
-const double alpha = 0.8; // smoothing factor
+const double alpha = 0.8; 	// smoothing factor
 double peak = 0.0;
 
 // Timing
