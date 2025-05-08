@@ -121,7 +121,4 @@ void displayFrequency(int freq) {
     lcd.print(freq);
     lcd.print(" Hz");
   }
-
-  Serial.print("Freq: ");
-  Serial.println(freq);
 }
