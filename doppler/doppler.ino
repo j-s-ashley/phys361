@@ -29,6 +29,8 @@ Jordan Ashley @j-s-ashley
 --- end of header ---
 */
 
+
+#define FFT_SPEED_OVER_PRECISION // use reciprocal multiplication for division + bonus speedups
 #include <arduinoFFT.h>
 #include <LiquidCrystal.h>
 
