@@ -9,7 +9,6 @@ Last edit:
 by
 Jordan Ashley @j-s-ashley
 
-TODO: add microphone circuit info
   The circuit:
  * LCD RS pin to digital pin 12
  * LCD Enable pin to digital pin 11
@@ -20,9 +19,12 @@ TODO: add microphone circuit info
  * LCD R/W pin to ground
  * LCD VSS pin to ground
  * LCD VCC pin to 5V
- * 10K resistor:
- * ends to +5V and ground
- * wiper to LCD VO pin (pin 3)
+ * 10K potentiometer
+   * ends to +5V and ground
+   * wiper to LCD VO pin (pin 3)
+ * MAX4466 VCC pin to 3.3V
+ * MAX4466 OUT pin to A0
+ * MAX4466 GND pin to ground
 
 --- end of header ---
 */
